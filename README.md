@@ -1,21 +1,23 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+#​🚀 Changelog: Version 0.2.0 (Feedback Update)
+​This update significantly improves how we listen to our community.
 
-# Run and deploy your AI Studio app
+*​Enhanced In-App Feedback: We have replaced the external email draft system with a new, seamless, in-app feedback dialog.
 
-This contains everything you need to run your app locally.
+*​Instant Delivery: Feedback is now sent directly from the application to our development monitoring channel, ensuring that reports of bugs or feature requests are received and tracked instantly.
+​Streamlined User Experience: Users no longer need to leave the application or rely on external email clients to share their thoughts, resulting in a more frictionless experience.
 
-View your app in AI Studio: https://ai.studio/apps/1e06c72d-969e-44cb-83e6-791f837668a6
+*​Privacy-First Design: While the feedback mechanism is now integrated, it remains strictly privacy-focused and does not require users to share any personal information.
 
-## Run Locally
+#​🛠️ How to Provide Feedback
+We value every piece of feedback! If you encounter an issue or have a feature request:
 
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
+*​Navigate to the Settings menu within the app.
 
+*​Tap on Help & Feedback.
 
-1. Open Android Studio
-2. Select **Open** and choose the directory containing this project
-3. Allow Android Studio to fix any incompatibilities as it imports the project.
-4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
-5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
-6. Run the app on an emulator or physical device
+*​Type your message into the provided field and hit Submit.
+
+*​You will receive an instant confirmation toast once your feedback has been successfully delivered.
+
+#​🔒 Note on Privacy
+​This application is built with a "Privacy-First" philosophy. Our new feedback system utilizes a direct, secure integration that ensures your message is delivered efficiently without storing sensitive data or requiring you to share personal contact information like your email address or phone number.
