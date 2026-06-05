@@ -1,0 +1,6 @@
+{
+  "name": "URL Checker",
+  "description": "A native URL interceptor and browser link unshortener that analyzes links for security and uncovers hidden redirects.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
