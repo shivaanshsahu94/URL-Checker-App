@@ -1,21 +1,18 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
 
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/1e06c72d-969e-44cb-83e6-791f837668a6
-
-## Run Locally
-
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
+# URL Checker (Android Beta)
 
 
-1. Open Android Studio
-2. Select **Open** and choose the directory containing this project
-3. Allow Android Studio to fix any incompatibilities as it imports the project.
-4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
-5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
-6. Run the app on an emulator or physical device
+A privacy-focused intent interceptor built with Material 3 Expressive Design. 
+
+## What does it do?
+
+
+Instead of blindly opening web links in your browser, URL Checker intercepts the link, unmasks shortened URLs, and displays the true destination in a floating popup. From there, you can safely copy it, share it, or send it directly to VirusTotal for a security scan. 
+
+## How to Download
+
+
+To test the app, go to the Releases section on the right side of this page, download the latest .apk file, and install it on your Android device. 
+
+
+Note: You may need to enable "Install from Unknown Sources" in your Android settings to install the APK.
