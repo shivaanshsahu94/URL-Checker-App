@@ -1,23 +1,8 @@
-#​🚀 Changelog: Version 0.2.0 (Feedback Update)
-​This update significantly improves how we listen to our community.
+### What's New in v0.8.345(beta3)
 
-*​Enhanced In-App Feedback: We have replaced the external email draft system with a new, seamless, in-app feedback dialog.
-
-*​Instant Delivery: Feedback is now sent directly from the application to our development monitoring channel, ensuring that reports of bugs or feature requests are received and tracked instantly.
-​Streamlined User Experience: Users no longer need to leave the application or rely on external email clients to share their thoughts, resulting in a more frictionless experience.
-
-*​Privacy-First Design: While the feedback mechanism is now integrated, it remains strictly privacy-focused and does not require users to share any personal information.
-
-#​🛠️ How to Provide Feedback
-We value every piece of feedback! If you encounter an issue or have a feature request:
-
-*​Navigate to the Settings menu within the app.
-
-*​Tap on Help & Feedback.
-
-*​Type your message into the provided field and hit Submit.
-
-*​You will receive an instant confirmation toast once your feedback has been successfully delivered.
-
-#​🔒 Note on Privacy
-​This application is built with a "Privacy-First" philosophy. Our new feedback system utilizes a direct, secure integration that ensures your message is delivered efficiently without storing sensitive data or requiring you to share personal contact information like your email address or phone number.
+* **Fluid Glassmorphism UI:** Built entirely with Jetpack Compose, the UI now features perfectly optimized translucent layers and native Android blur effects to create a premium liquid glass look over the user's active apps.
+* **Expressive Animations:** Enjoy completely new Material 3 bouncing animations when navigating between the History and Settings pages.
+* **Custom Avatars:** The profile menu now utilizes customized, distinct avatars rather than standard default placeholders.
+* ]**Flawless Interception:** The app globally intercepts http and https links across the Android OS, smoothly routing them without triggering the dreaded default browser infinite loop.
+* **Performance Upgrades:** A massive reduction in GPU load ensures your background wallpaper blurs instantly without lag, optimized directly via the Android Studio Profiler.
+* **Modern Android Exclusive:** Exclusively designed for Android 12+ (Minimum SDK 31) to provide the fastest, most modern user experience possible without legacy bloatware.
