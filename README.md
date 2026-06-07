@@ -1,8 +1,21 @@
-### What's New in v0.8.345(beta3)
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-* **Fluid Glassmorphism UI:** Built entirely with Jetpack Compose, the UI now features perfectly optimized translucent layers and native Android blur effects to create a premium liquid glass look over the user's active apps.
-* **Expressive Animations:** Enjoy completely new Material 3 bouncing animations when navigating between the History and Settings pages.
-* **Custom Avatars:** The profile menu now utilizes customized, distinct avatars rather than standard default placeholders.
-* ]**Flawless Interception:** The app globally intercepts http and https links across the Android OS, smoothly routing them without triggering the dreaded default browser infinite loop.
-* **Performance Upgrades:** A massive reduction in GPU load ensures your background wallpaper blurs instantly without lag, optimized directly via the Android Studio Profiler.
-* **Modern Android Exclusive:** Exclusively designed for Android 12+ (Minimum SDK 31) to provide the fastest, most modern user experience possible without legacy bloatware.
+# Run and deploy your AI Studio app
+
+This contains everything you need to run your app locally.
+
+View your app in AI Studio: https://ai.studio/apps/1e06c72d-969e-44cb-83e6-791f837668a6
+
+## Run Locally
+
+**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
+
+
+1. Open Android Studio
+2. Select **Open** and choose the directory containing this project
+3. Allow Android Studio to fix any incompatibilities as it imports the project.
+4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
+5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
+6. Run the app on an emulator or physical device
