@@ -1,21 +1,12 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+## 📊 Current Project Status: Beta 4 (v0.9.50)
 
-# Run and deploy your AI Studio app
+URL Checker is currently in its **Beta 4** phase. 
 
-This contains everything you need to run your app locally.
+This build enforces a strict **Minimum SDK of 31 (Android 12+)**, allowing us to drop bloated legacy compatibility libraries. The current architecture features:
+* Jetpack Compose UI with native `window.setBackgroundBlurRadius()` liquid glassmorphism.
+* Infinite-Loop intent resolution (explicitly bypassing native Android browser loops).
+* Hyper-optimized battery management via `Expedited WorkManager`.
+* Bundled Baseline Profiles for instant UI rendering.
+* Aggressive R8 code shrinking for an ultra-lightweight footprint.
 
-View your app in AI Studio: https://ai.studio/apps/1e06c72d-969e-44cb-83e6-791f837668a6
-
-## Run Locally
-
-**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
-
-
-1. Open Android Studio
-2. Select **Open** and choose the directory containing this project
-3. Allow Android Studio to fix any incompatibilities as it imports the project.
-4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
-5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
-6. Run the app on an emulator or physical device
+*We are currently stabilizing this build in preparation for our official 1.0 Stable Release.*
