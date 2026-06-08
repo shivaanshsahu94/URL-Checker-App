@@ -1,0 +1,6 @@
+Landroidx/compose/material3/**
+Landroidx/compose/ui/**
+Landroidx/compose/runtime/**
+Landroidx/compose/foundation/**
+Landroidx/compose/animation/**
+Lcom/example/**

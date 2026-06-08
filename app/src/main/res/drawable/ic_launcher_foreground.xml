@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group
+        android:name="scaled_icon"
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="1.35"
+        android:scaleY="1.35">
+
+        <!-- "WWW" bold stylized letters, centered under the magnifying glass lens -->
+        <!-- First 'W' -->
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M24,46 L29,62 L33,52 L37,62 L42,46" />
+
+        <!-- Second 'W' -->
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M44,46 L49,62 L53,52 L57,62 L62,46" />
+
+        <!-- Third 'W' -->
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M64,46 L69,62 L73,52 L77,62 L82,46" />
+
+        <!-- Semi-transparent glass tint highlight over text -->
+        <path
+            android:fillColor="#40FFFFFF"
+            android:pathData="M54,53m-24,0a24,24 0 1,1 48,0a24,24 0 1,1 -48,0" />
+
+        <!-- Magnifying Glass Lens border (Rim), centered at (54,53), radius 24 -->
+        <path
+            android:strokeColor="#2FD0ED"
+            android:strokeWidth="5"
+            android:pathData="M54,53m-24,0a24,24 0 1,1 48,0a24,24 0 1,1 -48,0" />
+
+        <!-- Glossy Accent Glass Reflection Arc (Top-Left gloss curve inside lens) -->
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="3"
+            android:strokeLineCap="round"
+            android:pathData="M38,41 A18,18 0 0,1 56,33" />
+
+        <!-- Magnifying Glass Handle with cyan/blue gloss styling -->
+        <path
+            android:strokeColor="#4895EF"
+            android:strokeWidth="7"
+            android:strokeLineCap="round"
+            android:pathData="M71,70 L86,85" />
+
+        <path
+            android:strokeColor="#56CCF2"
+            android:strokeWidth="3.0"
+            android:strokeLineCap="round"
+            android:pathData="M72,71 L83,82" />
+
+        <!-- Smooth glowing green checkmark (vibrant defense asset) at the bottom -->
+        <path
+            android:strokeColor="#27AE60"
+            android:strokeWidth="7"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M44,82 L52,90 L66,74" />
+
+        <path
+            android:strokeColor="#2ECC71"
+            android:strokeWidth="4.0"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M44,82 L52,90 L66,74" />
+
+    </group>
+
+</vector>
