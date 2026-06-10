@@ -3,6 +3,7 @@ package com.example.ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -12,6 +13,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun StickHistoryIcon(color: Color, modifier: Modifier = Modifier) {
+    val arrowPath = remember { Path() }
     Canvas(modifier = modifier.size(24.dp)) {
         val r = size.width / 2f - 3f
         val center = Offset(size.width / 2f, size.height / 2f)
@@ -46,11 +48,10 @@ fun StickHistoryIcon(color: Color, modifier: Modifier = Modifier) {
         )
 
         // Little arrow tip on top to feel like recurring history loop context
-        val arrowPath = Path().apply {
-            moveTo(center.x - 3.dp.toPx(), center.y - r - 2.dp.toPx())
-            lineTo(center.x + 2.dp.toPx(), center.y - r)
-            lineTo(center.x - 3.dp.toPx(), center.y - r + 3.dp.toPx())
-        }
+        arrowPath.reset()
+        arrowPath.moveTo(center.x - 3.dp.toPx(), center.y - r - 2.dp.toPx())
+        arrowPath.lineTo(center.x + 2.dp.toPx(), center.y - r)
+        arrowPath.lineTo(center.x - 3.dp.toPx(), center.y - r + 3.dp.toPx())
         drawPath(
             path = arrowPath,
             color = color,
@@ -103,6 +104,7 @@ fun StickSettingsIcon(color: Color, modifier: Modifier = Modifier) {
 
 @Composable
 fun StickProfileIcon(color: Color, modifier: Modifier = Modifier) {
+    val shoulderPath = remember { Path() }
     Canvas(modifier = modifier.size(24.dp)) {
         val w = size.width
         val h = size.height
@@ -116,13 +118,12 @@ fun StickProfileIcon(color: Color, modifier: Modifier = Modifier) {
         )
 
         // Shoulders (arch starting from lower left to lower right)
-        val shoulderPath = Path().apply {
-            moveTo(w * 0.15f, h * 0.85f)
-            quadraticTo(
-                w / 2f, h * 0.55f, // Control point triggers natural shoulder drop
-                w * 0.85f, h * 0.85f
-            )
-        }
+        shoulderPath.reset()
+        shoulderPath.moveTo(w * 0.15f, h * 0.85f)
+        shoulderPath.quadraticTo(
+            w / 2f, h * 0.55f, // Control point triggers natural shoulder drop
+            w * 0.85f, h * 0.85f
+        )
         drawPath(
             path = shoulderPath,
             color = color,
@@ -133,6 +134,8 @@ fun StickProfileIcon(color: Color, modifier: Modifier = Modifier) {
 
 @Composable
 fun StickDustbinIcon(color: Color, modifier: Modifier = Modifier) {
+    val bodyPath = remember { Path() }
+    val handlePath = remember { Path() }
     Canvas(modifier = modifier.size(24.dp)) {
         val w = size.width
         val h = size.height
@@ -146,12 +149,11 @@ fun StickDustbinIcon(color: Color, modifier: Modifier = Modifier) {
         )
 
         // Trashcan bracket
-        val bodyPath = Path().apply {
-            moveTo(w * 0.3f, h * 0.25f)
-            lineTo(w * 0.32f, h * 0.85f)
-            lineTo(w * 0.68f, h * 0.85f)
-            lineTo(w * 0.7f, h * 0.25f)
-        }
+        bodyPath.reset()
+        bodyPath.moveTo(w * 0.3f, h * 0.25f)
+        bodyPath.lineTo(w * 0.32f, h * 0.85f)
+        bodyPath.lineTo(w * 0.68f, h * 0.85f)
+        bodyPath.lineTo(w * 0.7f, h * 0.25f)
         drawPath(
             path = bodyPath,
             color = color,
@@ -159,12 +161,11 @@ fun StickDustbinIcon(color: Color, modifier: Modifier = Modifier) {
         )
 
         // Lid handle
-        val handlePath = Path().apply {
-            moveTo(w * 0.42f, h * 0.25f)
-            lineTo(w * 0.42f, h * 0.15f)
-            lineTo(w * 0.58f, h * 0.15f)
-            lineTo(w * 0.58f, h * 0.25f)
-        }
+        handlePath.reset()
+        handlePath.moveTo(w * 0.42f, h * 0.25f)
+        handlePath.lineTo(w * 0.42f, h * 0.15f)
+        handlePath.lineTo(w * 0.58f, h * 0.15f)
+        handlePath.lineTo(w * 0.58f, h * 0.25f)
         drawPath(
             path = handlePath,
             color = color,
@@ -212,6 +213,7 @@ fun StickCloseIcon(color: Color, modifier: Modifier = Modifier) {
 
 @Composable
 fun StickArrowBackIcon(color: Color, modifier: Modifier = Modifier) {
+    val headPath = remember { Path() }
     Canvas(modifier = modifier.size(24.dp)) {
         val w = size.width
         val h = size.height
@@ -225,11 +227,10 @@ fun StickArrowBackIcon(color: Color, modifier: Modifier = Modifier) {
         )
 
         // Arrow head leaves
-        val headPath = Path().apply {
-            moveTo(w * 0.45f, h * 0.25f)
-            lineTo(w * 0.2f, h / 2f)
-            lineTo(w * 0.45f, h * 0.75f)
-        }
+        headPath.reset()
+        headPath.moveTo(w * 0.45f, h * 0.25f)
+        headPath.lineTo(w * 0.2f, h / 2f)
+        headPath.lineTo(w * 0.45f, h * 0.75f)
         drawPath(
             path = headPath,
             color = color,
@@ -262,27 +263,27 @@ fun StickShareIcon(color: Color, modifier: Modifier = Modifier) {
 
 @Composable
 fun StickCopyIcon(color: Color, modifier: Modifier = Modifier) {
+    val rearPath = remember { Path() }
+    val frontPath = remember { Path() }
     Canvas(modifier = modifier.size(24.dp)) {
         val w = size.width
         val h = size.height
 
         // Rear card
-        val rearPath = Path().apply {
-            moveTo(w * 0.15f, h * 0.4f)
-            lineTo(w * 0.15f, h * 0.15f)
-            lineTo(w * 0.6f, h * 0.15f)
-            lineTo(w * 0.6f, h * 0.4f)
-        }
+        rearPath.reset()
+        rearPath.moveTo(w * 0.15f, h * 0.4f)
+        rearPath.lineTo(w * 0.15f, h * 0.15f)
+        rearPath.lineTo(w * 0.6f, h * 0.15f)
+        rearPath.lineTo(w * 0.6f, h * 0.4f)
         drawPath(path = rearPath, color = color, style = Stroke(width = 1.8f.dp.toPx()))
 
         // Front card
-        val frontPath = Path().apply {
-            moveTo(w * 0.35f, h * 0.35f)
-            lineTo(w * 0.35f, h * 0.85f)
-            lineTo(w * 0.85f, h * 0.85f)
-            lineTo(w * 0.85f, h * 0.35f)
-            close()
-        }
+        frontPath.reset()
+        frontPath.moveTo(w * 0.35f, h * 0.35f)
+        frontPath.lineTo(w * 0.35f, h * 0.85f)
+        frontPath.lineTo(w * 0.85f, h * 0.85f)
+        frontPath.lineTo(w * 0.85f, h * 0.35f)
+        frontPath.close()
         drawPath(path = frontPath, color = color, style = Stroke(width = 2.dp.toPx()))
     }
 }
@@ -313,24 +314,24 @@ fun StickSearchWwwIcon(color: Color, modifier: Modifier = Modifier) {
 
 @Composable
 fun StickSecurityIcon(color: Color, modifier: Modifier = Modifier) {
+    val shieldPath = remember { Path() }
     Canvas(modifier = modifier.size(24.dp)) {
         val w = size.width
         val h = size.height
 
         // Draw a minimalist M3 high-security shield path
-        val shieldPath = Path().apply {
-            moveTo(w * 0.2f, h * 0.2f)
-            lineTo(w * 0.8f, h * 0.2f)
-            quadraticTo(
-                w * 0.8f, h * 0.55f,
-                w / 2f, h * 0.85f
-            )
-            quadraticTo(
-                w * 0.2f, h * 0.55f,
-                w * 0.2f, h * 0.2f
-            )
-            close()
-        }
+        shieldPath.reset()
+        shieldPath.moveTo(w * 0.2f, h * 0.2f)
+        shieldPath.lineTo(w * 0.8f, h * 0.2f)
+        shieldPath.quadraticTo(
+            w * 0.8f, h * 0.55f,
+            w / 2f, h * 0.85f
+        )
+        shieldPath.quadraticTo(
+            w * 0.2f, h * 0.55f,
+            w * 0.2f, h * 0.2f
+        )
+        shieldPath.close()
         drawPath(path = shieldPath, color = color, style = Stroke(width = 2.dp.toPx()))
 
         // Internal lock/tick indicator
@@ -382,18 +383,18 @@ fun StickAboutIcon(color: Color, modifier: Modifier = Modifier) {
 
 @Composable
 fun StickHelpIcon(color: Color, modifier: Modifier = Modifier) {
+    val qPath = remember { Path() }
     Canvas(modifier = modifier.size(24.dp)) {
         val w = size.width
         val h = size.height
 
         // Question mark path
-        val qPath = Path().apply {
-            moveTo(w * 0.32f, h * 0.32f)
-            quadraticTo(w * 0.32f, h * 0.18f, w * 0.5f, h * 0.18f)
-            quadraticTo(w * 0.68f, h * 0.18f, w * 0.68f, h * 0.34f)
-            quadraticTo(w * 0.68f, h * 0.45f, w * 0.5f, h * 0.52f)
-            lineTo(w * 0.5f, h * 0.62f)
-        }
+        qPath.reset()
+        qPath.moveTo(w * 0.32f, h * 0.32f)
+        qPath.quadraticTo(w * 0.32f, h * 0.18f, w * 0.5f, h * 0.18f)
+        qPath.quadraticTo(w * 0.68f, h * 0.18f, w * 0.68f, h * 0.34f)
+        qPath.quadraticTo(w * 0.68f, h * 0.45f, w * 0.5f, h * 0.52f)
+        qPath.lineTo(w * 0.5f, h * 0.62f)
         drawPath(path = qPath, color = color, style = Stroke(width = 2.dp.toPx()))
 
         // Dot

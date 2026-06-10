@@ -4,19 +4,25 @@ import android.app.Application
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.data.*
+import com.example.ui.navigation.Tab
+import com.example.util.SecurityConfig
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.concurrent.TimeUnit
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -34,67 +40,69 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _isDefaultBrowser = MutableStateFlow(false)
     val isDefaultBrowser: StateFlow<Boolean> = _isDefaultBrowser.asStateFlow()
 
-    private val _isLinkIntercepted = MutableStateFlow(false)
-    val isLinkIntercepted: StateFlow<Boolean> = _isLinkIntercepted.asStateFlow()
+    // Intercepted URL state is delegated to the shared application-scoped repository
+    val isLinkIntercepted: StateFlow<Boolean> = InterceptedUrlRepository.isLinkIntercepted
+    val originalUrl: StateFlow<String> = InterceptedUrlRepository.originalUrl
+    val resolvedUrl: StateFlow<String> = InterceptedUrlRepository.resolvedUrl
+    val isResolving: StateFlow<Boolean> = InterceptedUrlRepository.isResolving
 
-    private val _originalUrl = MutableStateFlow("")
-    val originalUrl: StateFlow<String> = _originalUrl.asStateFlow()
+    // Tab state: type-safe sealed class navigation
+    private val _selectedTab = MutableStateFlow<Tab>(Tab.History)
+    val selectedTab: StateFlow<Tab> = _selectedTab.asStateFlow()
 
-    private val _resolvedUrl = MutableStateFlow("")
-    val resolvedUrl: StateFlow<String> = _resolvedUrl.asStateFlow()
+    // Settings States — properly encapsulated with private backing fields
+    private val _profileName = MutableStateFlow(settingsManager.profileName)
+    val profileName: StateFlow<String> = _profileName.asStateFlow()
 
-    private val _isResolving = MutableStateFlow(false)
-    val isResolving: StateFlow<Boolean> = _isResolving.asStateFlow()
+    private val _profileAvatar = MutableStateFlow(settingsManager.profileAvatar)
+    val profileAvatar: StateFlow<Int> = _profileAvatar.asStateFlow()
 
-    // Tab state: "history" or "settings"
-    private val _selectedTab = MutableStateFlow("history")
-    val selectedTab: StateFlow<String> = _selectedTab.asStateFlow()
+    private val _defaultChecker = MutableStateFlow(settingsManager.defaultChecker)
+    val defaultChecker: StateFlow<String> = _defaultChecker.asStateFlow()
 
-    // Settings States
-    val profileName = MutableStateFlow(settingsManager.profileName)
-    val profileAvatar = MutableStateFlow(settingsManager.profileAvatar)
-    val defaultChecker = MutableStateFlow(settingsManager.defaultChecker)
-    val appTheme = MutableStateFlow(settingsManager.theme)
-    val saveHistory = MutableStateFlow(settingsManager.saveHistory)
-    val autoDeleteDays = MutableStateFlow(settingsManager.autoDeleteDays)
+    private val _appTheme = MutableStateFlow(settingsManager.theme)
+    val appTheme: StateFlow<String> = _appTheme.asStateFlow()
+
+    private val _saveHistory = MutableStateFlow(settingsManager.saveHistory)
+    val saveHistory: StateFlow<Boolean> = _saveHistory.asStateFlow()
+
+    private val _autoDeleteDays = MutableStateFlow(settingsManager.autoDeleteDays)
+    val autoDeleteDays: StateFlow<Int> = _autoDeleteDays.asStateFlow()
+
+    // Feedback submission state
+    private val _feedbackSubmitting = MutableStateFlow(false)
+    val feedbackSubmitting: StateFlow<Boolean> = _feedbackSubmitting.asStateFlow()
 
     init {
-        viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.Main.immediate) {
             checkDefaultBrowser()
+        }
+        viewModelScope.launch(Dispatchers.Default) {
             scheduleCleanupWorker()
         }
     }
 
     fun checkDefaultBrowser() {
         val context = getApplication<Application>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val roleManager = context.getSystemService(Context.ROLE_SERVICE) as? RoleManager
-            _isDefaultBrowser.value = roleManager?.isRoleHeld(RoleManager.ROLE_BROWSER) == true
-        } else {
-            // Pre-Q fallback: We check if there's any fallback preferred browser, or we check dynamically
-            _isDefaultBrowser.value = false
-        }
+        val roleManager = context.getSystemService(Context.ROLE_SERVICE) as? RoleManager
+        _isDefaultBrowser.value = roleManager?.isRoleHeld(RoleManager.ROLE_BROWSER) == true
     }
 
     private fun scheduleCleanupWorker() {
         val context = getApplication<Application>()
-        val request = androidx.work.OneTimeWorkRequestBuilder<HistoryCleanupWorker>()
-            .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .setBackoffCriteria(androidx.work.BackoffPolicy.LINEAR, 10, java.util.concurrent.TimeUnit.MINUTES)
+        val request = PeriodicWorkRequestBuilder<HistoryCleanupWorker>(24, TimeUnit.HOURS)
             .build()
-        WorkManager.getInstance(context).enqueueUniqueWork(
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "history_cleanup",
-            androidx.work.ExistingWorkPolicy.REPLACE,
+            ExistingPeriodicWorkPolicy.KEEP,
             request
         )
     }
 
     /**
      * Intercepts, filters, and processes incoming system Intent.ACTION_VIEW events.
-     * When a link is selected externally, this captures the raw URL, triggers transition
-     * screens, invokes the off-thread network redirect resolver (UrlResolver), updates state flows
-     * for popup display layers, and logs the session dynamically in the local Room database
-     * depending on the user's historical log retention settings.
+     * Delegates to the shared [InterceptedUrlRepository] so state is visible
+     * across all activity instances.
      */
     fun handleIntent(intent: Intent?) {
         if (intent == null) return
@@ -102,34 +110,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val data = intent.dataString
         // Capture standard external browser navigation hooks
         if (action == Intent.ACTION_VIEW && !data.isNullOrBlank()) {
-            _isLinkIntercepted.value = true
-            _isResolving.value = true
-            viewModelScope.launch {
-                // Route heavy text parsing during the auto-clipboard interception to Dispatchers.Default
-                val parsedData = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
-                    // Optimized parsing simulation for the intercepted link
-                    data.trim()
-                }
-                
-                _originalUrl.value = parsedData
-
-                // Background task traces redirect chains (e.g. shorteners) to reveal final targets
-                val resolved = UrlResolver.resolveUrl(parsedData)
-                _resolvedUrl.value = resolved
-                _isResolving.value = false
-
-                // Increment logs if the user has database-level history preservation turned on
-                if (saveHistory.value) {
-                    repository.insert(parsedData, resolved)
-                }
-            }
+            InterceptedUrlRepository.handleInterceptedUrl(
+                rawUrl = data,
+                saveHistory = _saveHistory.value,
+                historyRepository = repository,
+                scope = viewModelScope
+            )
         }
     }
 
     fun closeInterceptor() {
-        _isLinkIntercepted.value = false
-        _originalUrl.value = ""
-        _resolvedUrl.value = ""
+        InterceptedUrlRepository.closeInterceptor()
     }
 
     fun deleteHistoryItem(id: Int) {
@@ -144,37 +135,37 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setTab(tab: String) {
+    fun setTab(tab: Tab) {
         _selectedTab.value = tab
     }
 
     fun updateProfileName(name: String) {
-        profileName.value = name
+        _profileName.value = name
         settingsManager.profileName = name
     }
 
     fun updateProfileAvatar(avatarIdx: Int) {
-        profileAvatar.value = avatarIdx
+        _profileAvatar.value = avatarIdx
         settingsManager.profileAvatar = avatarIdx
     }
 
     fun updateDefaultChecker(checker: String) {
-        defaultChecker.value = checker
+        _defaultChecker.value = checker
         settingsManager.defaultChecker = checker
     }
 
     fun updateTheme(theme: String) {
-        appTheme.value = theme
+        _appTheme.value = theme
         settingsManager.theme = theme
     }
 
     fun updateSaveHistory(save: Boolean) {
-        saveHistory.value = save
+        _saveHistory.value = save
         settingsManager.saveHistory = save
     }
 
     fun updateAutoDeleteDays(days: Int) {
-        autoDeleteDays.value = days
+        _autoDeleteDays.value = days
         settingsManager.autoDeleteDays = days
     }
 
@@ -186,8 +177,81 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return try {
             val bytes = url.toByteArray(Charsets.UTF_8)
             android.util.Base64.encodeToString(bytes, android.util.Base64.NO_PADDING or android.util.Base64.NO_WRAP)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             url
+        }
+    }
+
+    /**
+     * Submits user feedback via the configured webhook endpoint.
+     * Uses the shared [NetworkModule.feedbackClient] to avoid per-call OkHttpClient creation.
+     *
+     * @param text The feedback text from the user
+     * @param onResult Callback with true on success, false on failure
+     */
+    fun submitFeedback(text: String, onResult: (Boolean) -> Unit) {
+        val webhookUrl = SecurityConfig.getFeedbackUrl()
+        if (webhookUrl.isBlank()) {
+            onResult(false)
+            return
+        }
+
+        _feedbackSubmitting.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val jsonPayload = org.json.JSONObject().apply {
+                    put("content", "New App Feedback: $text")
+                }.toString()
+
+                val mediaType = "application/json; charset=utf-8".toMediaType()
+                val requestBody = jsonPayload.toRequestBody(mediaType)
+                val request = Request.Builder()
+                    .url(webhookUrl)
+                    .post(requestBody)
+                    .build()
+
+                NetworkModule.feedbackClient.newCall(request).execute().use { response ->
+                    val success = response.isSuccessful || response.code == 204
+                    withContext(Dispatchers.Main) {
+                        _feedbackSubmitting.value = false
+                        onResult(success)
+                    }
+                }
+            } catch (_: Exception) {
+                withContext(Dispatchers.Main) {
+                    _feedbackSubmitting.value = false
+                    onResult(false)
+                }
+            }
+        }
+    }
+
+    fun getCheckerUrl(url: String): String {
+        return when (_defaultChecker.value) {
+            "Google Safe Browsing" -> {
+                try {
+                    val encoded = java.net.URLEncoder.encode(url, "UTF-8")
+                    "https://transparencyreport.google.com/safe-browsing/search?url=$encoded"
+                } catch (_: Exception) {
+                    "https://transparencyreport.google.com/safe-browsing/search"
+                }
+            }
+            "URLVoid" -> "https://www.urlvoid.com/"
+            else -> {
+                val base64Url = getEncodedUrlForVirusTotal(url)
+                "https://www.virustotal.com/gui/home/search"
+            }
+        }
+    }
+
+    /**
+     * Returns a display label for the user's selected default checker.
+     */
+    fun getCheckerLabel(): String {
+        return when (_defaultChecker.value) {
+            "Google Safe Browsing" -> "Safe Browsing"
+            "URLVoid" -> "URLVoid"
+            else -> "VirusTotal"
         }
     }
 }

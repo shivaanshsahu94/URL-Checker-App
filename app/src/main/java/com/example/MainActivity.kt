@@ -33,7 +33,9 @@ class MainActivity : ComponentActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
-        viewModel.handleIntent(intent)
+        if (savedInstanceState == null) {
+            viewModel.handleIntent(intent)
+        }
 
         setContent {
             val themeValue by viewModel.appTheme.collectAsStateWithLifecycle()
@@ -46,12 +48,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            // Use dynamic color only when the user hasn't explicitly chosen a theme
+            val useDynamicColor = remember(themeValue) {
+                themeValue == "System"
+            }
+
             // Statically track the blur setting once to prevent unbounded state observations or loop invalidations
             val isBlurEnabled = remember {
                 initialBlurEnabled
             }
 
-            MyApplicationTheme(darkTheme = darkTheme) {
+            MyApplicationTheme(darkTheme = darkTheme, dynamicColor = useDynamicColor) {
                 val scaffoldBg = remember(isBlurEnabled, darkTheme) {
                     if (isBlurEnabled) {
                         androidx.compose.ui.graphics.Color(0x20000000)
@@ -68,7 +75,7 @@ class MainActivity : ComponentActivity() {
                     containerColor = scaffoldBg,
                     contentWindowInsets = WindowInsets(0, 0, 0, 0)
                 ) { innerPadding ->
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                         MainLayoutScreen(viewModel = viewModel)
                     }
                 }

@@ -35,7 +35,9 @@ class InterceptorActivity : ComponentActivity() {
         window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
         window.setDimAmount(0.0f)
         enableEdgeToEdge()
-        viewModel.handleIntent(intent)
+        if (savedInstanceState == null) {
+            viewModel.handleIntent(intent)
+        }
 
         setContent {
             val themeValue by viewModel.appTheme.collectAsStateWithLifecycle()
@@ -48,12 +50,17 @@ class InterceptorActivity : ComponentActivity() {
                 }
             }
 
+            // Use dynamic color only when the user hasn't explicitly chosen a theme
+            val useDynamicColor = remember(themeValue) {
+                themeValue == "System"
+            }
+
             // Statically track the blur setting once to prevent unbounded state observations or loop invalidations
             val isBlurEnabled = remember {
                 initialBlurEnabled
             }
 
-            MyApplicationTheme(darkTheme = darkTheme) {
+            MyApplicationTheme(darkTheme = darkTheme, dynamicColor = useDynamicColor) {
                 val boxBg = remember(isBlurEnabled, darkTheme) {
                     if (isBlurEnabled) {
                         Color.Transparent

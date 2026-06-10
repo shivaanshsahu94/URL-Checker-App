@@ -4,11 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.net.URL
 import java.util.concurrent.TimeUnit
 
 object UrlResolver {
-    // Custom OkHttpClient with redirect-following disabled internally. 
+    // Custom OkHttpClient with redirect-following disabled internally.
     // This allows the app to intercept each HTTP 3xx redirection hop manually,
     // evaluate the safe target, and prevent infinite redirection loops or malicious trapping.
     private val client = OkHttpClient.Builder()
@@ -20,8 +19,9 @@ object UrlResolver {
 
     /**
      * Programmatically traces nested redirections (HTTP 3xx statuses) up to 8 max hops.
-     * Uses efficient HEAD requests by default to minimize network load and bandwidth, 
-     * falling back seamlessly to standard GET request chains if a target server rejects HEAD.
+     * Uses efficient HEAD requests by default to minimize network load and bandwidth.
+     * Falls back to GET only if the server explicitly rejects HEAD (405/501),
+     * and all subsequent hops in the chain continue using GET.
      */
     suspend fun resolveUrl(url: String): String {
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
@@ -32,16 +32,31 @@ object UrlResolver {
             var currentUrl = url
             var redirects = 0
             val maxRedirects = 8
+            var useGet = false // Once a server rejects HEAD, use GET for rest of chain
+            val visited = mutableSetOf<String>()
 
             while (redirects < maxRedirects) {
+                if (currentUrl in visited) {
+                    break // cycle detected
+                }
+                visited.add(currentUrl)
                 try {
                     val request = Request.Builder()
                         .url(currentUrl)
-                        .head() // Use HEAD request for maximum efficiency and speed
+                        .apply { if (useGet) get() else head() }
                         .build()
 
                     client.newCall(request).execute().use { response ->
-                        if (response.code in 300..399) {
+                        val code = response.code
+
+                        // If HEAD returned a non-successful status code (error or non-redirect), switch to GET and retry
+                        if (!useGet && code !in 200..399) {
+                            useGet = true
+                            // Retry this same URL with GET instead of advancing
+                            continue
+                        }
+
+                        if (code in 300..399) {
                             val location = response.header("Location")
                             if (!location.isNullOrBlank()) {
                                 currentUrl = resolveRelativeUrl(currentUrl, location)
@@ -49,27 +64,11 @@ object UrlResolver {
                                 continue
                             }
                         }
+                        // Non-redirect response (2xx, 4xx, etc.) — we've reached the final destination
                     }
-                } catch (e: Exception) {
-                    // Fail gracefully and attempt GET if HEAD is not supported by server
-                    try {
-                        val getRequest = Request.Builder()
-                            .url(currentUrl)
-                            .get()
-                            .build()
-                        client.newCall(getRequest).execute().use { response ->
-                            if (response.code in 300..399) {
-                                val location = response.header("Location")
-                                if (!location.isNullOrBlank()) {
-                                    currentUrl = resolveRelativeUrl(currentUrl, location)
-                                    redirects++
-                                    continue
-                                }
-                            }
-                        }
-                    } catch (ex: Exception) {
-                        break
-                    }
+                } catch (_: Exception) {
+                    // Network error — stop resolution, return current best URL
+                    break
                 }
                 break
             }
@@ -79,8 +78,8 @@ object UrlResolver {
 
     private fun resolveRelativeUrl(base: String, relative: String): String {
         return try {
-            URL(URL(base), relative).toString()
-        } catch (e: Exception) {
+            java.net.URI(base).resolve(relative).toString()
+        } catch (_: Exception) {
             relative
         }
     }

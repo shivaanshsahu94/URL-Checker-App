@@ -35,6 +35,7 @@ class HistoryRepository(private val historyDao: HistoryDao) {
     }
 
     suspend fun deleteOlderThan(days: Int) {
+        require(days > 0) { "days must be positive, was $days" }
         // Audit: explicitly push DB write to Dispatchers.IO
         withContext(Dispatchers.IO) {
             val cutoff = System.currentTimeMillis() - (days * 24L * 60 * 60 * 1000)

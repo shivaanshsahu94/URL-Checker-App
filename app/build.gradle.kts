@@ -13,9 +13,9 @@ android {
   defaultConfig {
     applicationId = "com.aistudio.urlchecker.qxmvty"
     minSdk = 31
-    targetSdk = 35
-    versionCode = 15
-    versionName = "0.9.50(beta4)"
+    targetSdk = 36
+    versionCode = 17
+    versionName = "1.0.5.700"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -80,7 +80,6 @@ secrets {
 // This makes it easy to add them back in the future if needed.
 dependencies {
   implementation(platform(libs.androidx.compose.bom))
-  implementation(platform(libs.firebase.bom))
   implementation(libs.androidx.activity.compose)
   implementation(libs.androidx.constraintlayout.compose)
   implementation(libs.androidx.compose.material.icons.core)

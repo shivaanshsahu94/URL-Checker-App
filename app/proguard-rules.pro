@@ -43,3 +43,16 @@
 -keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,Exception
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
+
+# Strip all android.util.Log calls from the release build.
+# R8 will completely remove these call sites, producing a smaller and
+# cleaner release binary with no logcat output leaking internal state.
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int d(...);
+    public static int i(...);
+    public static int w(...);
+    public static int e(...);
+    public static int wtf(...);
+    public static java.lang.String getStackTraceString(java.lang.Throwable);
+}
